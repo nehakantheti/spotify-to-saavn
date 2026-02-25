@@ -38,3 +38,39 @@ def test_search_song_success(mocker):
 
     assert "query" in kwargs['params']      # checks if query is in keyword arguments passed
     assert kwargs['params']['query'] == 'Shape of You Ed Sheeran'   # Checks the exact search query extracted from the mock response
+
+def test_create_playlist_success(mocker):
+    mock_response = mocker.MagicMock()
+    mock_response.status_code = 200     # mocking success response
+
+    mock_response.json.return_value = {'status': 'success', 'data': {'id': 'P999'}}
+
+    mock_post = mocker.patch('src.spotify_to_saavn.saavn.requests.post', return_value = mock_response)
+
+    client = SaavnClient(auth_cookie="my_secret_jio_cookie")
+    created_playlist_id = client.create_playlist("My Spotify Transfer")
+
+    # asserts that mock_post is called exactly once
+    assert created_playlist_id == "P999"
+    mock_post.assert_called_once()
+
+    args, kwargs = mock_post.call_args
+    assert kwargs['headers']['Cookie'] == 'my_secret_jio_cookie'
+    assert kwargs['json']['title'] == 'My Spotify Transfer'
+
+def test_add_songs_to_playlist(mocker):
+    mock_response = mocker.MagicMock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = {'status': 'success'}
+
+    mock_put = mocker.patch('src.spotify_to_saavn.saavn.requests.put', return_value=mock_response)
+
+    client = SaavnClient(auth_cookie="my_secret_jio_cookie")
+    
+    success = client.add_songs_to_playlist("P999", ['S123', 'S456'])
+
+    assert success is True
+    mock_put.assert_called_once()
+    
+    args, kwargs = mock_put.call_args
+    assert kwargs['json']['song_ids'] == ['S123', 'S456']
