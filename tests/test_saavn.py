@@ -1,5 +1,12 @@
+from pathlib import Path
+
 import pytest
 from src.spotify_to_saavn.saavn import SaavnClient
+from dotenv import load_dotenv
+import os
+
+env_path = Path(__file__).parent / ".env"
+load_dotenv(dotenv_path=env_path)
 
 def test_search_song_success(mocker):
     # making mock objects for responses
@@ -23,7 +30,7 @@ def test_search_song_success(mocker):
     # mocking the request.get function to deliver above response
     mock_get = mocker.patch('src.spotify_to_saavn.saavn.requests.get', return_value=mock_response)
 
-    client = SaavnClient()
+    client = SaavnClient(auth_cookie=os.getenv('SAAVN_COOKIE'))
     result = client.search_song("Shape of You Ed Sheeran")
 
     # asserting a valid response
