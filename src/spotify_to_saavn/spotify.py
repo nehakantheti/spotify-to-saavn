@@ -1,6 +1,6 @@
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-from src.spotify_to_saavn import config
+import os
 # import os
 # from dotenv import load_dotenv
 from src.spotify_to_saavn.logger import setup_logger
@@ -16,9 +16,9 @@ class SpotifyClient:
     def __init__(self):
         logger.info("Initializing Spotify Client Class")
         self.sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
-            client_id=config.SPOTIPY_CLIENT_ID,
-            client_secret=config.SPOTIPY_CLIENT_SECRET,
-            redirect_uri=config.SPOTIPY_REDIRECT_URI,
+            client_id=os.getenv('SPOTIFY_CLIENT_ID'),
+            client_secret=os.getenv('SPOTIFY_CLIENT_SECRET'),
+            redirect_uri=os.getenv('SPOTIFY_REDIRECT_URI'),
             scope="playlist-read-private"
         ))
 
