@@ -159,6 +159,7 @@ def test_get_playlist_tracks_with_pagination(mocker):
     assert tracks[1]['name'] == 'Song 2'
     assert tracks[2]['name'] == 'Song 3'
 
+    # // makes sure the function playlist_items is called exactly called once with the mock objct - fails if it is not called exactly once
     mock_spotify_instance.playlist_items.assert_called_once_with('fake_playlist_id_123')
     assert mock_spotify_instance.next.call_count == 2
     
