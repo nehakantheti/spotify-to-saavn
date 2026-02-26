@@ -1,25 +1,32 @@
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import os
-# import os
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 from src.spotify_to_saavn.logger import setup_logger
 
 logger = setup_logger(__name__)
-# load_dotenv()
-
-# client_id = os.getenv("SPOTIFY_CLIENT_ID")
-# client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
-# redirect_uri = os.getenv("SPOTIFY_REDIRECT_URI")
 
 class SpotifyClient:
     def __init__(self):
         logger.info("Initializing Spotify Client Class")
+        # Load .env (if present) so env vars are available when running helpers/tests
+        load_dotenv()
+
+        client_id = os.getenv('SPOTIPY_CLIENT_ID')
+        client_secret = os.getenv('SPOTIPY_CLIENT_SECRET')
+        redirect_uri = os.getenv('SPOTIPY_REDIRECT_URI')
+
+        # logger.info(f'{client_id}\n{client_secret}\n{redirect_uri}')
+
+        if not client_id or not client_secret or not redirect_uri:
+            logger.error("Missing Spotify credentials. Ensure SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET and SPOTIFY_REDIRECT_URI are set in the environment or .env file.")
+            raise RuntimeError("Missing Spotify credentials: set SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET and SPOTIFY_REDIRECT_URI")
+
         self.sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
-            client_id=os.getenv('SPOTIFY_CLIENT_ID'),
-            client_secret=os.getenv('SPOTIFY_CLIENT_SECRET'),
-            redirect_uri=os.getenv('SPOTIFY_REDIRECT_URI'),
-            scope="playlist-read-private"
+            client_id=client_id,
+            client_secret=client_secret,
+            redirect_uri=redirect_uri,
+            scope="playlist-read-private playlist-read-collaborative"
         ))
 
         logger.info("Spotify Client initialization completed successfully!")

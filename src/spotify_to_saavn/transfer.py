@@ -46,7 +46,7 @@ class TransferManager:
 
             if saavn_result is None:
                 logger.warning(f"Skipping track, no match found: {query}")
-                missing_tracks.append(query)
+                missing_tracks.append(track)
                 continue  # Skip this track
 
             # logger.warning(f"{saavn_result}")

@@ -7,13 +7,13 @@ def test_transfer_playlist_workflow(mocker):
 
     # making mock spotify return 2 tracks
     mock_spotify.get_playlist_tracks.return_value = [
-        {'name': 'Shape of You', 'artist': 'Ed Sheeran'},
-        {'name': 'Obscure Indie Song', 'artist':'Local Band'}
+        {'name': 'Shape of You', 'artist': 'Ed Sheeran', 'language': 'english'},
+        {'name': 'Obscure Indie Song', 'artist':'Local Band', 'language': 'english'}
     ]
 
     # making saavn mock the first search result successfully, but 2nd one to return None
     mock_saavn.search_song.side_effect = [
-        {'id': 'S123', 'title': 'Shape of You', 'singers': 'Ed Sheeran'},
+        {'id': 'S123', 'song': 'Shape of You', 'singers': 'Ed Sheeran', 'language': 'english', 'album': "Ed Sheeran's Music"},
         None
     ]
 
@@ -22,7 +22,9 @@ def test_transfer_playlist_workflow(mocker):
     matched_ids, missing_tracks = manager.get_jiosaavn_track_ids('fake_playlist_id_123')
 
     assert len(matched_ids) == 1
-    assert matched_ids[0] == 'S123'
+    # assert matched_ids[0] == 'S123'
+    assert 'S123' in matched_ids 
+    assert matched_ids['S123'] == 'english' # You can even check the value (language)
 
     # mocked only one missing track
     assert len(missing_tracks) == 1
@@ -45,7 +47,7 @@ def test_execute_transfer(mocker):
         manager,
         'get_jiosaavn_track_ids',
         # matched song ids and missing tracks
-        return_value=(['S123', 'S456'], [{'name': 'Missing Song'}])
+        return_value=({'S123':'english', 'S456':'hindi'}, [{'name': 'Missing Song'}])
     )
 
     result = manager.execute_transfer(
@@ -57,4 +59,4 @@ def test_execute_transfer(mocker):
 
     manager.get_jiosaavn_track_ids.assert_called_once_with('fake_spotify_id_123')
     mock_saavn.create_playlist.assert_called_once_with("My Awesome Summer Mix")
-    mock_saavn.add_songs_to_playlist.assert_called_once_with("P999", ['S123', 'S456'])
+    mock_saavn.add_songs_to_playlist.assert_called_once_with("P999", {'S123':'english', 'S456':'hindi'})
